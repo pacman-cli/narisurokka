@@ -14,12 +14,6 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConfig {
-    private final ConsumerFactory consumerFactory;
-
-    public KafkaConfig(ConsumerFactory consumerFactory) {
-        this.consumerFactory = consumerFactory;
-    }
-
     // need two beans : Consumer Factory and kafka Listener Container Factory
     @Bean
     public ConsumerFactory<String, Object> consumerFactory(){
