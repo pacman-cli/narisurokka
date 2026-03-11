@@ -2,6 +2,12 @@ package org.example.userservice.controller;
 
 import java.util.UUID;
 
+import org.example.userservice.dto.UserPreferenceRequest;
+import org.example.userservice.dto.UserPreferenceResponse;
+import org.example.userservice.dto.UserRegistrationRequest;
+import org.example.userservice.dto.UserResponse;
+import org.example.userservice.dto.UserUpdateRequest;
+import org.example.userservice.service.impl.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,12 +28,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.dto.UserPreferenceRequest;
-import org.example.userservice.dto.UserPreferenceResponse;
-import org.example.userservice.dto.UserRegistrationRequest;
-import org.example.userservice.dto.UserResponse;
-import org.example.userservice.dto.UserUpdateRequest;
-import org.example.userservice.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -35,7 +35,7 @@ import org.example.userservice.service.UserService;
 @Tag(name = "User Controller", description = "User registration, profile management, and preferences")
 public class UserController {
 
-  private final UserService userService;
+  private final UserServiceImpl userService;
 
   // ===================== User Profile Endpoints =====================
 
