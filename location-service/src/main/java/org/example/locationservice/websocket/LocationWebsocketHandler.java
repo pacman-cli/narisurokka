@@ -2,6 +2,7 @@ package org.example.locationservice.websocket;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.example.locationservice.model.LocationPing;
@@ -18,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class LocationWebsocketHandler extends TextWebSocketHandler {
-    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, Set<WebSocketSession>> sessions = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // BUG (fixed) — WebSocket NullPointerException Crash (HIGH)
@@ -45,7 +46,7 @@ public class LocationWebsocketHandler extends TextWebSocketHandler {
                 session.close();
                 return;
             }
-            sessions.put(sosId, session);
+            sessions.computeIfAbsent(sosId, k -> ConcurrentHashMap.newKeySet()).add(session);
             log.info("Websocket connection established for sosId: {}", sosId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,8 +55,8 @@ public class LocationWebsocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        // remove the closed session from our map
-        sessions.entrySet().removeIf(entry -> entry.getValue().equals(session));
+        sessions.values().forEach(set -> set.remove(session));
+
         log.info("Websocket connection closed for session: {}", session.getId());
     }
 
@@ -66,12 +67,17 @@ public class LocationWebsocketHandler extends TextWebSocketHandler {
         // Serializes location; sends if session open; handles exceptions
         try {
             String message = objectMapper.writeValueAsString(locationPing);
-            WebSocketSession webSocketSession = sessions.get(locationPing.getSosId().toString());
-            if (webSocketSession != null && webSocketSession.isOpen()) {
-                webSocketSession.sendMessage(new TextMessage(message));
+            Set<WebSocketSession> webSocketSessions = sessions.get(locationPing.getSosId().toString());
+            if (webSocketSessions != null) {
+                for (WebSocketSession ws : webSocketSessions) {
+                    if (ws.isOpen()) {
+                        ws.sendMessage(new TextMessage(message));
+                    }
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to broadcast location for sosId={}", locationPing.getSosId(), e);
+
         }
     }
 }
