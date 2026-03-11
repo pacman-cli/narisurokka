@@ -51,6 +51,9 @@ public class SosCase {
     @Schema(description = "Reason for cancellation if cancelled", example = "False alarm")
     private String cancelReason;
 
+    @Schema(description = "Notes when SOS was resolved")
+    private String resolutionNotes;
+
     @Version
     @Schema(description = "Version for optimistic locking", hidden = true)
     private Integer version;
