@@ -3,11 +3,6 @@ package org.example.userservice.service.impl;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.example.userservice.dto.UserPreferenceRequest;
 import org.example.userservice.dto.UserPreferenceResponse;
 import org.example.userservice.dto.UserRegistrationRequest;
@@ -21,18 +16,21 @@ import org.example.userservice.model.User;
 import org.example.userservice.model.UserPreference;
 import org.example.userservice.repository.UserPreferenceRepository;
 import org.example.userservice.repository.UserRepository;
-import org.example.userservice.service.UserService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl {
 
   private final UserRepository userRepository;
   private final UserPreferenceRepository preferenceRepository;
   private final UserEventProducer eventProducer;
 
-  @Override
   @Transactional
   public UserResponse registerUser(UserRegistrationRequest request) {
     // Check for duplicate email
@@ -72,14 +70,12 @@ public class UserServiceImpl implements UserService {
     return mapToResponse(user);
   }
 
-  @Override
   @Transactional(readOnly = true)
   public UserResponse getUserById(UUID id) {
     User user = findActiveUserById(id);
     return mapToResponse(user);
   }
 
-  @Override
   @Transactional(readOnly = true)
   public UserResponse getUserByPhone(String phone) {
     User user = userRepository.findByPhoneAndDeletedAtIsNull(phone)
@@ -87,7 +83,6 @@ public class UserServiceImpl implements UserService {
     return mapToResponse(user);
   }
 
-  @Override
   @Transactional
   public UserResponse updateUser(UUID id, UserUpdateRequest request) {
     User user = findActiveUserById(id);
@@ -133,7 +128,6 @@ public class UserServiceImpl implements UserService {
     return mapToResponse(user);
   }
 
-  @Override
   @Transactional
   public void deleteUser(UUID id) {
     User user = findActiveUserById(id);
@@ -149,7 +143,6 @@ public class UserServiceImpl implements UserService {
     log.info("User soft-deleted: id={}", user.getId());
   }
 
-  @Override
   @Transactional(readOnly = true)
   public UserPreferenceResponse getUserPreferences(UUID userId) {
     // Verify user exists
@@ -161,7 +154,6 @@ public class UserServiceImpl implements UserService {
     return mapToPreferenceResponse(preference);
   }
 
-  @Override
   @Transactional
   public UserPreferenceResponse updateUserPreferences(UUID userId, UserPreferenceRequest request) {
     // Verify user exists
