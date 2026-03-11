@@ -49,17 +49,35 @@ The goal of NariSurokkha is to build a **production-grade distributed system** t
 
 The system follows an **event-driven microservices architecture**.
 
-Frontend (Next.js)
-|
-API Gateway
-|
-| Auth | User | SOS | Location | Notification | Incident |
-| Chat | Analytics | Admin |
+```mermaid
+graph TD
+    Client[Frontend Next.js App] --> Gateway[API Gateway :8080]
 
-|
-Kafka Event Bus
-|
-Redis Cache + PostgreSQL (per service)
+    Gateway --> Auth[Auth Service :8081]
+    Gateway --> User[User Service :8082]
+    Gateway --> SOS[SOS Service :8083]
+    Gateway --> Location[Location Service :8084]
+    Gateway --> Notification[Notification Service :8085]
+
+    Auth -.-> DB_Auth[(PostgreSQL Auth)]
+    Auth -.-> Redis_Auth[(Redis Cache)]
+
+    User -.-> DB_User[(PostgreSQL User)]
+
+    SOS -.-> DB_SOS[(PostgreSQL SOS)]
+    SOS -.-> Redis_SOS[(Redis Active Cases)]
+    SOS -- Publish: sos.events --> Kafka([Kafka Event Bus])
+
+    Location -.-> DB_Location[(PostgreSQL Location)]
+    Location -.-> Redis_Location[(Redis GEO)]
+    Location -- Publish: location.updates --> Kafka
+
+    Notification -.-> DB_Notif[(PostgreSQL Notification)]
+    Kafka -- Consume: sos.events --> Notification
+
+    Auth -- Publish: auth.events --> Kafka
+    User -- Publish: user.events --> Kafka
+```
 
 
 ---
@@ -223,16 +241,16 @@ Each microservice owns its **independent database** to ensure loose coupling and
 
 ### Rules
 
-- **No cross-service joins**  
+- **No cross-service joins**
   Services must communicate through APIs or events (Kafka), never direct database joins.
 
-- **UUID primary keys**  
+- **UUID primary keys**
   All tables use UUIDs to avoid ID collisions across distributed services.
 
-- **Soft deletes where required**  
+- **Soft deletes where required**
   Records should use flags like `is_deleted` or `deleted_at` instead of hard deletes when audit/history is needed.
 
-- **Event-based communication only**  
+- **Event-based communication only**
   All cross-service data flow must happen via Kafka events or REST APIs.
 
 ---
@@ -243,19 +261,19 @@ Redis is used as a **high-speed in-memory store** for real-time and transient da
 
 ### Use Cases
 
-- **Active SOS state caching**  
+- **Active SOS state caching**
   Stores currently active SOS sessions for fast lookup.
 
-- **OTP storage**  
+- **OTP storage**
   Temporary storage with TTL for authentication verification.
 
-- **Rate limiting**  
+- **Rate limiting**
   Prevents abuse of sensitive endpoints (e.g., SOS trigger, login attempts).
 
-- **WebSocket presence**  
+- **WebSocket presence**
   Tracks online users and active real-time sessions.
 
-- **Geo-location storage**  
+- **Geo-location storage**
   Uses Redis GEO commands for fast location updates and proximity queries.
 
 ---
@@ -289,7 +307,7 @@ cd sos-service
 
 Repeat the same process for each microservice.
 
-Run Frontend 
+Run Frontend
 ```bash
 cd frontend
 npm install
@@ -363,4 +381,4 @@ This project demonstrates:
 - Event-driven microservices
 - Real-time processing
 - Scalable backend design
-- Production-grade system patterns  
+- Production-grade system patterns
