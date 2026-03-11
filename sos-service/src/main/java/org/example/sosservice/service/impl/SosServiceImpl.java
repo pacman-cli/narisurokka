@@ -89,7 +89,7 @@ public class SosServiceImpl implements SosService {
         sos.setStatus(SosStatus.RESOLVED);
         sos.setResolvedAt(Instant.now());
         if (resolutionNotes != null && !resolutionNotes.isBlank()) {
-            sos.setCancelReason(resolutionNotes); // reusing field for notes
+            sos.setResolutionNotes(resolutionNotes);
         }
         repository.save(sos);
 
