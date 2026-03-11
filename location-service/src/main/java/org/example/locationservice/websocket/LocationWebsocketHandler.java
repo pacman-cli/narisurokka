@@ -51,6 +51,13 @@ public class LocationWebsocketHandler extends TextWebSocketHandler {
         }
     }
 
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
+        // remove the closed session from our map
+        sessions.entrySet().removeIf(entry -> entry.getValue().equals(session));
+        log.info("Websocket connection closed for session: {}", session.getId());
+    }
+
     /**
      * Serializes location then sends if session open
      */
