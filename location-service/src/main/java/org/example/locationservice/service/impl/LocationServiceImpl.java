@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.example.locationservice.dto.LocationResponse;
+import org.example.locationservice.exception.LocationNotFoundException;
 import org.example.locationservice.kafka.LocationEventProducer;
 import org.example.locationservice.model.LocationPing;
 import org.example.locationservice.repository.LocationPingRepository;
@@ -65,7 +66,7 @@ public class LocationServiceImpl implements LocationService {
     @Transactional(readOnly = true)
     public LocationResponse getLatestLocation(UUID userId) {
         LocationPing ping = repository.findTopByUserIdOrderByTimestampDesc(userId)
-                .orElseThrow(() -> new RuntimeException("No location found for user " + userId));
+                .orElseThrow(() -> new LocationNotFoundException("No location found for user " + userId));
         return mapToResponse(ping);
     }
 
