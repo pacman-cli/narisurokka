@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,8 +26,7 @@ public class JwtTokenProvider {
       @Value("${jwt.secret}") String secret,
       @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
       @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
-    this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(
-        java.util.Base64.getEncoder().encodeToString(secret.getBytes())));
+    this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     this.accessTokenExpiration = accessTokenExpiration;
     this.refreshTokenExpiration = refreshTokenExpiration;
   }
