@@ -51,4 +51,14 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
   }
+
+  @ExceptionHandler(LocationNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> handleNotFound(LocationNotFoundException e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(Map.of(
+            "error", "Not Found",
+            "message", e.getMessage(),
+            "timestamp", Instant.now().toString()));
+
+  }
 }
