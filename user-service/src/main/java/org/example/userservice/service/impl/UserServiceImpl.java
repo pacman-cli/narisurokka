@@ -8,6 +8,7 @@ import org.example.userservice.dto.UserPreferenceResponse;
 import org.example.userservice.dto.UserRegistrationRequest;
 import org.example.userservice.dto.UserResponse;
 import org.example.userservice.dto.UserUpdateRequest;
+import org.example.userservice.event.UserRegisteredEvent;
 import org.example.userservice.exception.DuplicateUserException;
 import org.example.userservice.exception.UserNotFoundException;
 import org.example.userservice.kafka.UserEventProducer;
@@ -16,6 +17,7 @@ import org.example.userservice.model.User;
 import org.example.userservice.model.UserPreference;
 import org.example.userservice.repository.UserPreferenceRepository;
 import org.example.userservice.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class UserServiceImpl {
   private final UserRepository userRepository;
   private final UserPreferenceRepository preferenceRepository;
   private final UserEventProducer eventProducer;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   @Transactional
   public UserResponse registerUser(UserRegistrationRequest request) {
@@ -64,7 +67,10 @@ public class UserServiceImpl {
     preferenceRepository.save(preference);
 
     // Publish Kafka event
-    eventProducer.publishUserRegistered(user.getId(), user.getEmail(), user.getPhone());
+    // eventProducer.publishUserRegistered(user.getId(), user.getEmail(),
+    // user.getPhone());
+    // bug fix: instead of calling kafka direclty ,publish a spring event
+    applicationEventPublisher.publishEvent(new UserRegisteredEvent(user.getId(), user.getEmail(), user.getPhone()));
 
     log.info("User registered successfully: id={}, email={}", user.getId(), user.getEmail());
     return mapToResponse(user);
