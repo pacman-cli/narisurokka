@@ -49,7 +49,7 @@ public class LocationWebsocketHandler extends TextWebSocketHandler {
             sessions.computeIfAbsent(sosId, k -> ConcurrentHashMap.newKeySet()).add(session);
             log.info("Websocket connection established for sosId: {}", sosId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to broadcast location for sosId={}", session.getId(), e);
         }
     }
 
