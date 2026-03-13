@@ -14,13 +14,15 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class LocationWebsocketHandler extends TextWebSocketHandler {
     private final Map<String, Set<WebSocketSession>> sessions = new ConcurrentHashMap<>();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     // BUG (fixed) — WebSocket NullPointerException Crash (HIGH)
     @Override
