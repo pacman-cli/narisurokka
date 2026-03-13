@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -28,7 +29,7 @@ import lombok.Setter;
 @Schema(description = "SOS Case entity representing an emergency alert")
 public class SosCase {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Schema(description = "Unique identifier for the SOS case", example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID id;
 
@@ -57,6 +58,8 @@ public class SosCase {
     @Version
     @Schema(description = "Version for optimistic locking", hidden = true)
     private Integer version;
+
+    private Instant
 
 }
 // @Schema -> Swagger
