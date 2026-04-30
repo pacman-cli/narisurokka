@@ -1,7 +1,10 @@
 package org.example.userservice.controller;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.example.userservice.dto.TrustedContactRequest;
+import org.example.userservice.dto.TrustedContactResponse;
 import org.example.userservice.dto.UserPreferenceRequest;
 import org.example.userservice.dto.UserPreferenceResponse;
 import org.example.userservice.dto.UserRegistrationRequest;
@@ -127,5 +130,57 @@ public class UserController {
       @Parameter(description = "User UUID") @PathVariable UUID id,
       @Valid @RequestBody UserPreferenceRequest request) {
     return ResponseEntity.ok(userService.updateUserPreferences(id, request));
+  }
+
+  // ===================== Trusted Contacts Endpoints =====================
+
+  @Operation(summary = "Get all trusted contacts", description = "Retrieves all trusted emergency contacts for a user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Contacts found"),
+      @ApiResponse(responseCode = "404", description = "User not found")
+  })
+  @GetMapping("/{id}/contacts")
+  public ResponseEntity<List<TrustedContactResponse>> getTrustedContacts(
+      @Parameter(description = "User UUID") @PathVariable UUID id) {
+    return ResponseEntity.ok(userService.getTrustedContacts(id));
+  }
+
+  @Operation(summary = "Add trusted contact", description = "Adds a new trusted emergency contact for a user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "Contact created"),
+      @ApiResponse(responseCode = "400", description = "Invalid request"),
+      @ApiResponse(responseCode = "404", description = "User not found")
+  })
+  @PostMapping("/{id}/contacts")
+  public ResponseEntity<TrustedContactResponse> addTrustedContact(
+      @Parameter(description = "User UUID") @PathVariable UUID id,
+      @Valid @RequestBody TrustedContactRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(userService.addTrustedContact(id, request));
+  }
+
+  @Operation(summary = "Update trusted contact", description = "Updates an existing trusted contact.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Contact updated"),
+      @ApiResponse(responseCode = "404", description = "Contact not found")
+  })
+  @PutMapping("/{id}/contacts/{contactId}")
+  public ResponseEntity<TrustedContactResponse> updateTrustedContact(
+      @Parameter(description = "User UUID") @PathVariable UUID id,
+      @Parameter(description = "Contact UUID") @PathVariable UUID contactId,
+      @Valid @RequestBody TrustedContactRequest request) {
+    return ResponseEntity.ok(userService.updateTrustedContact(id, contactId, request));
+  }
+
+  @Operation(summary = "Delete trusted contact", description = "Soft-deletes a trusted contact.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Contact deleted"),
+      @ApiResponse(responseCode = "404", description = "Contact not found")
+  })
+  @DeleteMapping("/{id}/contacts/{contactId}")
+  public ResponseEntity<Void> deleteTrustedContact(
+      @Parameter(description = "User UUID") @PathVariable UUID id,
+      @Parameter(description = "Contact UUID") @PathVariable UUID contactId) {
+    userService.deleteTrustedContact(id, contactId);
+    return ResponseEntity.noContent().build();
   }
 }
