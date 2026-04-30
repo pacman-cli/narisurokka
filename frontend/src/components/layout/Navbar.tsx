@@ -1,10 +1,11 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { Menu, Shield, X } from "lucide-react"
+import { Menu, Shield, X, LogOut, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -16,6 +17,11 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const { isAuthenticated, logout, user } = useAuth()
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-white/10">
@@ -58,6 +64,28 @@ export default function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
+          {isAuthenticated ? (
+            <>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg">
+                <User className="h-4 w-4 text-slate-500" />
+                <span className="text-sm font-medium text-slate-700">{user?.email}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all"
+            >
+              Sign In
+            </Link>
+          )}
           <Link
             href="/sos"
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark hover:shadow-primary/40 transition-all"
@@ -102,6 +130,18 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    handleLogout()
+                    setMobileOpen(false)
+                  }}
+                  className="flex w-full items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              )}
               <Link
                 href="/sos"
                 onClick={() => setMobileOpen(false)}
