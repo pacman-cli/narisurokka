@@ -13,12 +13,13 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtil {
   @Value("${app.jwt.secret:9a4f2c8d3b7a1e6f45c8a0b3f267d8b1d4e6f3c8a9d2b5f8e3a9c8b5f6v8a3d9}")
   private String secret;
-
+//token validation
   public void validateToken(final String token) {
     Jwts.parserBuilder()
         .setSigningKey(getSignKey()).build().parseClaimsJws(token);
   }
 
+  //get sign key -> returns secret key
   private Key getSignKey() {
     byte[] keyBytes = Decoders.BASE64.decode(secret);
     return Keys.hmacShaKeyFor(keyBytes);

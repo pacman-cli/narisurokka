@@ -1,41 +1,78 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  --color-primary-light: #e0e7ff;
-  --color-secondary: #8b5cf6;
-  --color-accent: #ef4444;
-  --color-accent-light: #fef2f2;
-  --color-bg-light: #f8fafc;
-  --color-bg-dark: #0f172a;
-  --color-surface: #ffffff;
-  --color-surface-dark: #1e293b;
-  --color-emerald: #10b981;
-  --color-amber: #f59e0b;
+  /* 1. COLOR SYSTEM (Semantic & Accessible) */
+  /* Trust / Calm / Tech */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-900: #1e3a8a;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Danger / Emergency (High Contrast) */
+  --color-danger-50: #fef2f2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
 
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-pulse-ring: pulse-ring 2s ease-out infinite;
-  --animate-slide-up: slide-up 0.6s ease-out;
-  --animate-fade-in: fade-in 0.5s ease-out;
-  --animate-shimmer: shimmer 2s linear infinite;
-  --animate-glow: glow 2s ease-in-out infinite alternate;
-}
+  /* Success / Active Tracking */
+  --color-success-50: #ecfdf5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
+  /* Warning / Pre-alert */
+  --color-warning-50: #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
 
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.6); opacity: 0; }
+  /* Neutrals (Calm, highly legible) */
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+
+  /* Semantic Theme Variables (mapped to light/dark below) */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-hover: var(--bg-surface-hover);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
+
+  /* 2. TYPOGRAPHY SCALE (System default for zero-delay loading) */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --text-xs: 0.75rem;   /* 12px - Overlines, metadata */
+  --text-sm: 0.875rem;  /* 14px - Helper text */
+  --text-base: 1rem;    /* 16px - Body strictly AA accessible */
+  --text-lg: 1.125rem;  /* 18px - Subtitles */
+  --text-xl: 1.25rem;   /* 20px - Small Headers */
+  --text-2xl: 1.5rem;   /* 24px - Card Headers */
+  --text-3xl: 1.875rem; /* 30px - Page Titles */
+  --text-4xl: 2.25rem;  /* 36px - Emergency Overlays */
+
+  /* 3. SPACING SYSTEM (Strict 8px Grid Base) */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-2: 0.5rem;  /* 8px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-4: 1rem;    /* 16px (Base padding) */
+  --spacing-6: 1.5rem;  /* 24px */
+  --spacing-8: 2rem;    /* 32px (Section padding) */
+  --spacing-12: 3rem;   /* 48px */
+  --spacing-16: 4rem;   /* 64px */
+
+  /* 6. MOTION GUIDELINES */
+  --animate-sos-pulse: sos-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-tracking-ping: tracking-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-slide-up: slide-up 0.2s ease-out;  /* Fast, snappy response */
+  --animate-fade-in: fade-in 0.15s ease-out;
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -44,88 +81,85 @@
   to { opacity: 1; }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes sos-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .7; transform: scale(1.05); }
 }
 
-@keyframes glow {
-  from { box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
-  to { box-shadow: 0 0 40px rgba(99, 102, 241, 0.35); }
+@keyframes tracking-ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
 }
 
 @layer base {
-  * { @apply border-slate-200; }
+  :root {
+    /* 7. DARK MODE SUPPORT (Light Theme Defaults) */
+    --bg-base: var(--color-neutral-50);
+    --bg-surface: #ffffff;
+    --bg-surface-hover: var(--color-neutral-100);
+    --text-main: var(--color-neutral-900);
+    --text-muted: var(--color-neutral-700);
+    --border-subtle: var(--color-neutral-200);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Dark Theme Overrides */
+      --bg-base: var(--color-neutral-900);
+      --bg-surface: var(--color-neutral-800);
+      --bg-surface-hover: var(--color-neutral-700);
+      --text-main: var(--color-neutral-50);
+      --text-muted: var(--color-neutral-200);
+      --border-subtle: var(--color-neutral-700);
+    }
+  }
+
+  * {
+    @apply border-border-subtle;
+  }
+
   body {
-    @apply bg-bg-light text-slate-900 antialiased;
+    @apply bg-bg-base text-text-main antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
   html { scroll-behavior: smooth; }
 }
 
 @layer utilities {
-  .bg-grid {
-    background-image: linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+  /* 5. STATE SYSTEM UTILITIES */
+  .state-idle {
+    @apply border-border-subtle bg-bg-surface opacity-100 transition-colors duration-200;
   }
 
-  .glass {
-    background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.2);
+  .state-active-tracking {
+    @apply border-success-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-300;
   }
 
-  .glass-dark {
-    background: rgba(15,23,42,0.8);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
+  .state-emergency {
+    @apply border-danger-600 bg-danger-50 shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-sos-pulse;
+    /* Dark mode override for emergency text contrast */
+    color: var(--color-danger-700);
   }
 
-  .gradient-text {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .state-offline {
+    @apply filter grayscale opacity-70 cursor-not-allowed border-neutral-200 bg-neutral-100;
   }
 
-  .gradient-text-warm {
-    background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* 4. COMPONENT DESIGN TOKENS */
+  .btn-primary {
+    @apply bg-brand-600 text-white px-4 py-3 rounded-lg font-medium shadow-sm hover:bg-brand-700 active:scale-[0.98] transition-all;
   }
 
-  .blob-primary {
-    background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+  .btn-danger {
+    @apply bg-danger-600 text-white px-4 py-3 rounded-lg font-bold shadow-md hover:bg-danger-700 active:scale-[0.95] transition-all;
   }
 
-  .blob-purple {
-    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  .card {
+    @apply bg-bg-surface border border-border-subtle rounded-xl p-6 shadow-sm;
   }
 
-  .blob-rose {
-    background: radial-gradient(circle, rgba(244,63,94,0.08) 0%, transparent 70%);
-  }
-
-  .shimmer-bg {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
-  }
-
-  .noise-bg {
-    position: relative;
-  }
-  .noise-bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-    pointer-events: none;
+  .input-field {
+    @apply w-full bg-bg-base border border-border-subtle rounded-lg px-4 py-3 text-text-main placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all;
   }
 }
 

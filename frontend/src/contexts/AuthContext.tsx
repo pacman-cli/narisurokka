@@ -80,7 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const updateUser = (userData: Partial<User>) => {
-    const updated = { ...user, ...userData }
+    if (!user) return;
+    const updated = { ...user, ...userData } as User;
     setUser(updated)
     localStorage.setItem("user", JSON.stringify(updated))
   }

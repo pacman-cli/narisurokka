@@ -1,5 +1,6 @@
 import QueryProvider from "@/components/providers/QueryProvider"
 import { AuthProvider } from "@/contexts/AuthContext"
+import AppShell from "@/components/layout/AppShell"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -29,7 +30,9 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased">
         <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>
