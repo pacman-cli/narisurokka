@@ -3,9 +3,9 @@ package org.example.authservice.service.impl;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.example.authservice.authentication.AuthResponse;
-import org.example.authservice.authentication.LoginRequest;
-import org.example.authservice.registration.RegisterRequest;
+import org.example.authservice.dto.AuthResponse;
+import org.example.authservice.dto.LoginRequest;
+import org.example.authservice.dto.RegisterRequest;
 import org.example.authservice.exception.AuthenticationFailedException;
 import org.example.authservice.exception.InvalidTokenException;
 import org.example.authservice.exception.UserAlreadyExistsException;
