@@ -1,8 +1,11 @@
 package org.example.userservice.service.impl;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
+import org.example.userservice.dto.TrustedContactRequest;
+import org.example.userservice.dto.TrustedContactResponse;
 import org.example.userservice.dto.UserPreferenceRequest;
 import org.example.userservice.dto.UserPreferenceResponse;
 import org.example.userservice.dto.UserRegistrationRequest;
@@ -13,8 +16,10 @@ import org.example.userservice.exception.DuplicateUserException;
 import org.example.userservice.exception.UserNotFoundException;
 import org.example.userservice.kafka.UserEventProducer;
 import org.example.userservice.model.Gender;
+import org.example.userservice.model.TrustedContact;
 import org.example.userservice.model.User;
 import org.example.userservice.model.UserPreference;
+import org.example.userservice.repository.TrustedContactRepository;
 import org.example.userservice.repository.UserPreferenceRepository;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -31,6 +36,7 @@ public class UserServiceImpl {
 
   private final UserRepository userRepository;
   private final UserPreferenceRepository preferenceRepository;
+  private final TrustedContactRepository trustedContactRepository;
   private final UserEventProducer eventProducer;
   private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -197,6 +203,115 @@ public class UserServiceImpl {
     return mapToPreferenceResponse(preference);
   }
 
+  // ===================== Trusted Contacts Methods =====================
+
+  @Transactional(readOnly = true)
+  public TrustedContactResponse getTrustedContact(UUID userId, UUID contactId) {
+    findActiveUserById(userId);
+    TrustedContact contact = trustedContactRepository.findByIdAndDeletedAtIsNull(contactId)
+        .orElseThrow(() -> new UserNotFoundException("Trusted contact not found"));
+    if (!contact.getUser().getId().equals(userId)) {
+      throw new UserNotFoundException("Trusted contact not found");
+    }
+    return mapToContactResponse(contact);
+  }
+
+  @Transactional(readOnly = true)
+  public List<TrustedContactResponse> getTrustedContacts(UUID userId) {
+    findActiveUserById(userId);
+    List<TrustedContact> contacts = trustedContactRepository.findByUserIdAndDeletedAtIsNull(userId);
+    return contacts.stream().map(this::mapToContactResponse).toList();
+  }
+
+  @Transactional
+  public TrustedContactResponse addTrustedContact(UUID userId, TrustedContactRequest request) {
+    User user = findActiveUserById(userId);
+
+    // Check for duplicate phone
+    if (trustedContactRepository.existsByUserAndContactPhoneAndDeletedAtIsNull(user, request.getContactPhone())) {
+      throw new DuplicateUserException("Contact with phone " + request.getContactPhone() + " already exists");
+    }
+
+    // If this is set as primary, clear other primary contacts
+    if (Boolean.TRUE.equals(request.getIsPrimary())) {
+      trustedContactRepository.clearPrimaryContacts(userId);
+    }
+
+    TrustedContact contact = TrustedContact.builder()
+        .user(user)
+        .contactName(request.getContactName())
+        .contactPhone(request.getContactPhone())
+        .contactEmail(request.getContactEmail())
+        .relationship(request.getRelationship())
+        .isPrimary(Boolean.TRUE.equals(request.getIsPrimary()))
+        .notifySms(request.getNotifySms() != null ? request.getNotifySms() : true)
+        .notifyEmail(request.getNotifyEmail() != null ? request.getNotifyEmail() : true)
+        .notifyWhatsapp(Boolean.TRUE.equals(request.getNotifyWhatsapp()))
+        .build();
+
+    contact = trustedContactRepository.save(contact);
+    log.info("Trusted contact added for user {}: contactId={}", userId, contact.getId());
+    return mapToContactResponse(contact);
+  }
+
+  @Transactional
+  public TrustedContactResponse updateTrustedContact(UUID userId, UUID contactId, TrustedContactRequest request) {
+    findActiveUserById(userId);
+    TrustedContact contact = trustedContactRepository.findByIdAndDeletedAtIsNull(contactId)
+        .orElseThrow(() -> new UserNotFoundException("Trusted contact not found"));
+    if (!contact.getUser().getId().equals(userId)) {
+      throw new UserNotFoundException("Trusted contact not found");
+    }
+
+    // If setting as primary, clear other primary contacts
+    if (Boolean.TRUE.equals(request.getIsPrimary()) && !Boolean.TRUE.equals(contact.getIsPrimary())) {
+      trustedContactRepository.clearPrimaryContacts(userId);
+    }
+
+    if (request.getContactName() != null) {
+      contact.setContactName(request.getContactName());
+    }
+    if (request.getContactPhone() != null) {
+      contact.setContactPhone(request.getContactPhone());
+    }
+    if (request.getContactEmail() != null) {
+      contact.setContactEmail(request.getContactEmail());
+    }
+    if (request.getRelationship() != null) {
+      contact.setRelationship(request.getRelationship());
+    }
+    if (request.getIsPrimary() != null) {
+      contact.setIsPrimary(request.getIsPrimary());
+    }
+    if (request.getNotifySms() != null) {
+      contact.setNotifySms(request.getNotifySms());
+    }
+    if (request.getNotifyEmail() != null) {
+      contact.setNotifyEmail(request.getNotifyEmail());
+    }
+    if (request.getNotifyWhatsapp() != null) {
+      contact.setNotifyWhatsapp(request.getNotifyWhatsapp());
+    }
+
+    contact = trustedContactRepository.save(contact);
+    log.info("Trusted contact updated: contactId={}", contact.getId());
+    return mapToContactResponse(contact);
+  }
+
+  @Transactional
+  public void deleteTrustedContact(UUID userId, UUID contactId) {
+    findActiveUserById(userId);
+    TrustedContact contact = trustedContactRepository.findByIdAndDeletedAtIsNull(contactId)
+        .orElseThrow(() -> new UserNotFoundException("Trusted contact not found"));
+    if (!contact.getUser().getId().equals(userId)) {
+      throw new UserNotFoundException("Trusted contact not found");
+    }
+
+    contact.setDeletedAt(Instant.now());
+    trustedContactRepository.save(contact);
+    log.info("Trusted contact soft-deleted: contactId={}", contactId);
+  }
+
   // ===================== Helper Methods =====================
 
   private User findActiveUserById(UUID id) {
@@ -245,6 +360,22 @@ public class UserServiceImpl {
         .language(pref.getLanguage())
         .createdAt(pref.getCreatedAt())
         .updatedAt(pref.getUpdatedAt())
+        .build();
+  }
+
+  private TrustedContactResponse mapToContactResponse(TrustedContact contact) {
+    return TrustedContactResponse.builder()
+        .id(contact.getId().toString())
+        .userId(contact.getUser().getId().toString())
+        .contactName(contact.getContactName())
+        .contactPhone(contact.getContactPhone())
+        .contactEmail(contact.getContactEmail())
+        .relationship(contact.getRelationship())
+        .isPrimary(contact.getIsPrimary())
+        .notifySms(contact.getNotifySms())
+        .notifyEmail(contact.getNotifyEmail())
+        .notifyWhatsapp(contact.getNotifyWhatsapp())
+        .createdAt(contact.getCreatedAt())
         .build();
   }
 }

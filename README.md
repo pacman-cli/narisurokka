@@ -374,6 +374,27 @@ REDIS_PORT=6379
 
 ---
 
+## Technical Improvement Sectors (Identified Audit)
+
+### 1. Observability & Tracing
+- **Distributed Tracing**: Integrate OpenTelemetry + Jaeger/Zipkin to trace requests across microservices.
+- **Centralized Logging**: Implement ELK stack (Elasticsearch, Logstash, Kibana) for log aggregation.
+
+### 2. Resiliency & Reliability
+- **Circuit Breakers**: Add Resilience4j to handle cross-service communication failures gracefully.
+- **Service Mesh**: Consider Istio or Linkerd for mTLS, traffic routing, and failure injection.
+
+### 3. CI/CD & DevOps
+- **Automated Pipelines**: GitHub Actions for unit testing, Docker image building, and pushing to registry.
+- **Infrastructure as Code (IaC)**: Terraform scripts for provisioning cloud resources.
+- **Kubernetes**: Helm charts for standardized deployments.
+
+### 4. Security Enhancements
+- **mTLS**: Encrypt communication between internal microservices.
+- **API Gateway Rate Limiting**: Advanced rate limiting per user/IP using Redis bucket algorithms.
+
+---
+
 ## Why This Project Matters
 This project demonstrates:
 
